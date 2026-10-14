@@ -1,17 +1,20 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use tauri::Manager;
+
 #[tauri::command]
-fn compress_video(input_path: String, output_path: String, quality: String, remove_audio: bool) -> Result<String, String> {
-    // Inicializa os argumentos do FFmpeg
+fn compress_video(app: tauri::AppHandle, input_path: String, output_path: String, quality: String, remove_audio: bool) -> Result<String, String> {
+    // Localiza o motor FFmpeg que o GitHub embalou dentro do programa
+    let ffmpeg_path = app.path().resource_dir().unwrap().join("ffmpeg.exe");
+
     let mut args = vec![
         "-i".to_string(), input_path,
-        "-c:v".to_string(), "h264_qsv".to_string(), // Aceleração de hardware
+        "-c:v".to_string(), "h264_qsv".to_string(), 
         "-global_quality".to_string(), quality,
     ];
 
-    // Lógica para remover ou manter o áudio com base na escolha do utilizador
     if remove_audio {
-        args.push("-an".to_string()); // Parâmetro para apagar a faixa de áudio
+        args.push("-an".to_string());
     } else {
         args.push("-c:a".to_string());
         args.push("aac".to_string());
@@ -21,8 +24,7 @@ fn compress_video(input_path: String, output_path: String, quality: String, remo
 
     args.push(output_path);
 
-    // Executa o FFmpeg nativamente
-    let status = std::process::Command::new("ffmpeg")
+    let status = std::process::Command::new(ffmpeg_path)
         .args(args)
         .status()
         .map_err(|e| format!("Falha ao iniciar o FFmpeg: {}", e))?;
@@ -36,7 +38,7 @@ fn compress_video(input_path: String, output_path: String, quality: String, remo
 
 fn main() {
     tauri::Builder::default()
-        .plugin(tauri_plugin_dialog::init()) // Regista o plugin de janelas de sistema
+        .plugin(tauri_plugin_dialog::init())
         .invoke_handler(tauri::generate_handler![compress_video])
         .run(tauri::generate_context!())
         .expect("Erro ao executar a aplicação Tauri");
