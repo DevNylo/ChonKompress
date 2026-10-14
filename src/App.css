@@ -1,1 +1,5 @@
-body { background-color: #ffffff; }
+body {
+  background-color: #ffffff;
+  margin: 0;
+  overflow: hidden; /* Esta regra esconde qualquer barra de rolagem à força */
+}
