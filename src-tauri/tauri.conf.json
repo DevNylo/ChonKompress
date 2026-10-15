@@ -13,8 +13,8 @@
     "windows": [
       {
         "title": "ChonKompressor",
-        "width": 580,
-        "height": 780,
+        "width": 620,
+        "height": 660,
         "center": true,
         "resizable": false,
         "maximizable": false,
